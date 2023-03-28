@@ -177,28 +177,24 @@ fn save_article(article: &Article, path_root: &Path) {
 }
 
 fn get_news_links(href: &str, a_attr: &str, link_prefix: &str) -> Result<Vec<String>> {
-    match get(href) {
-        Ok(res) => {
-            let text = res.text().expect("Unable to get article text.");
-            let doc = Html::parse_document(&text);
+    let response = get(href)?;
+    let text = response.text()?;
+    let doc = Html::parse_document(&text);
 
-            // for CBC: a.card; NatPost: a.article_card__link
-            let link_selector = Selector::parse(a_attr).unwrap();
-            let links_elems = doc.select(&link_selector);
+    let link_selector = Selector::parse(a_attr).expect("Couldn't construct a selector.");
+    let links_elems = doc.select(&link_selector);
 
-            let mut links = Vec::new();
-            for link_elem in links_elems {
-                let link_text = link_elem.value().attr("href").unwrap();
-                if link_text.contains("/news/") {
-                    let full_link = format!("https://{link_prefix}{link_text}");
-                    links.push(String::from(full_link));
-                }
-            }
-
-            return Ok(links);
+    let links = links_elems.into_iter().filter_map(|elem| {
+        let link_text = elem.value().attr("href")?;
+        if link_text.contains("/news/") {
+            let full_link = format!("https://{link_prefix}{link_text}");
+            Some(full_link)
+        } else {
+            None
         }
-        Err(error) => return Err(anyhow!(error)),
-    };
+    }).collect();
+    
+    Ok(links)
 }
 
 struct NewsSite {
