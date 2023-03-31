@@ -5,16 +5,16 @@ use rand::SeedableRng;
 use std::{fs, io, path::*};
 
 #[derive(Debug, Clone)]
-struct ArticleEntry {
-    date: String,
-    path: PathBuf,
-    site: String,
+pub struct ArticleEntry {
+    pub date: String,
+    pub path: PathBuf,
+    pub site: String,
 }
 
 #[derive(Debug)]
 pub struct RawDataset {
-    train: Vec<ArticleEntry>,
-    test: Vec<ArticleEntry>,
+    pub train: Vec<ArticleEntry>,
+    pub test: Vec<ArticleEntry>,
 }
 
 fn get_news_site_paths(root_dir: &Path, site: String) -> Result<Vec<ArticleEntry>> {
