@@ -1,11 +1,12 @@
 use anyhow;
+use nlprule::Tokenizer;
 use std::collections::hash_map::RandomState;
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::{fs, io};
-use nlprule::Tokenizer;
 
 use crate::prepare_dataset::ArticleEntry;
+
 
 pub struct Indexer {
     index_map: HashMap<String, usize>,
@@ -56,7 +57,7 @@ impl Deindexer {
 }
 
 pub fn load_tokenizer() -> anyhow::Result<Tokenizer> {
-    dbg!("Loading tokenizer...");
+    println!("Loading tokenizer...");
     Ok(Tokenizer::new("./en_tokenizer.bin")?)
 }
 
@@ -75,12 +76,18 @@ fn get_tokens(tokenizer: &Tokenizer, text: &String) -> Vec<String> {
     tokens.collect()
 }
 
-pub fn tokenize_article_text(tokenizer: &Tokenizer, article_path: &Path) -> anyhow::Result<Vec<String>> {
+pub fn tokenize_article_text(
+    tokenizer: &Tokenizer,
+    article_path: &Path,
+) -> anyhow::Result<Vec<String>> {
     let article_text = read_article_text(article_path)?;
     Ok(get_tokens(tokenizer, &article_text))
 }
 
-pub fn tokenize_headline_text(tokenizer: &Tokenizer, article_path: &Path) -> anyhow::Result<Vec<String>> {
+pub fn tokenize_headline_text(
+    tokenizer: &Tokenizer,
+    article_path: &Path,
+) -> anyhow::Result<Vec<String>> {
     let headline = article_path
         .file_stem()
         .ok_or(anyhow::anyhow!("Could not find stem."))?;
@@ -88,7 +95,6 @@ pub fn tokenize_headline_text(tokenizer: &Tokenizer, article_path: &Path) -> any
         .to_str()
         .ok_or(anyhow::anyhow!("Could not convert to str"))?;
     let headline = String::from(headline).replace("_", " ");
-    dbg!(get_tokens(tokenizer, &headline));
     Ok(get_tokens(tokenizer, &headline))
 }
 
